@@ -9,6 +9,8 @@ export const EditorComponent = () => {
         theme: null
     });
 
+    let timerId = null;
+
     const { editorSocket } = useEditorSocketStore();
     const { activeFileTab, setActiveFileTab } = useActiveFileTabStore();
 
@@ -22,6 +24,23 @@ export const EditorComponent = () => {
     function handleEditorTheme(editor, monaco) {
         monaco.editor.defineTheme('dracula', editorState.theme);
         monaco.editor.setTheme('dracula');
+    }
+
+    function handleChange(value, event) {
+
+        // implementing debouncing
+        if (timerId) {
+            clearTimeout(timerId);
+        }
+        timerId = setTimeout(() => {
+            console.log("Editor value changed", value);
+        const editorContent = value;
+        editorSocket.emit('writeFile', {
+            pathToFileOrFolder: activeFileTab.path,
+            data: editorContent
+        });
+        }, 2000);
+        
     }
 
     useEffect(() => {
@@ -40,6 +59,7 @@ export const EditorComponent = () => {
                         fontSize: 18,
                         fontFamily: 'monospace'
                     }}
+                    onChange={handleChange}
                     value={activeFileTab?.value ? activeFileTab.value : '// Welcome to the playground'}
 
                     onMount={handleEditorTheme}

@@ -65,10 +65,10 @@ editorNamespace.on("connection", (socket) => {
     handleEditorSocketEvents(socket, editorNamespace);
     
 
-    socket.on('disconnect', async () => {
-        await watcher.close();
-        console.log('A user disconnected');
-    });
+    // socket.on('disconnect', async () => {
+    //     await watcher.close();
+    //     console.log('A user disconnected');
+    // });
 
     }
 });
