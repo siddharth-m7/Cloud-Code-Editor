@@ -43,10 +43,10 @@ editorNamespace.on("connection", (socket) => {
     console.log("editor connected");
 
     // somehow we will get the projectId from frontend;
-    // let projectId = socket.handshake.query['projectId'];
-    let projectId = '123';
+    let projectId = socket.handshake.query['projectId'];
+    // let projectId = '123';
 
-    // console.log("Project id received after connection", projectId);
+    console.log("Project id received after connection", projectId);
 
     if(projectId) {
         var watcher = chokidar.watch(`./projects/${projectId}`, {
@@ -61,7 +61,6 @@ editorNamespace.on("connection", (socket) => {
         watcher.on("all", (event, path) => {
             console.log(event, path);
         });
-    }
 
     handleEditorSocketEvents(socket, editorNamespace);
     
@@ -70,6 +69,8 @@ editorNamespace.on("connection", (socket) => {
         await watcher.close();
         console.log('A user disconnected');
     });
+
+    }
 });
 
 server.listen(PORT, () => {
