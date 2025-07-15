@@ -1,0 +1,14 @@
+.fileContextMenuButton {
+    width: 100%;
+    padding: 6px 12px;
+    border: none;
+    background-color: transparent;
+    color: #f1ecec;
+    text-align: 'left';
+    cursor: 'pointer';
+    font-size: 13px;
+    font-family: inherit;
+    display:flex;
+    align-items:center;
+    gap: '8px';
+}

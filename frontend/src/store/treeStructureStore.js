@@ -16,7 +16,7 @@ export const useTreeStructureStore = create((set, get) => {
                 queryFn: () => getProjectTree({ projectId: id }),
             });
 
-            console.log(data);
+            // console.log(data);
 
             set({
                 treeStructure: data

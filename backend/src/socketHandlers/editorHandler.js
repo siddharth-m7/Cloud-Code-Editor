@@ -2,21 +2,39 @@ import fs from "fs/promises";
 // import { getContainerPort } from "../containers/handleContainerCreate.js";
 
 export const handleEditorSocketEvents = (socket, editorNamespace) => {
-    socket.on("writeFile", async ({ data, pathToFileOrFolder }) => {
+
+    socket.on("joinFileRoom", ({ projectId, filePath }) => {
+        const roomName = `${projectId}:${filePath}`;
+        socket.join(roomName);
+        console.log(`Socket ${socket.id} joined room ${roomName}`);
+    });
+
+    socket.on("leaveFileRoom", ({ projectId, filePath }) => {
+        const roomName = `${projectId}:${filePath}`;
+        socket.leave(roomName);
+        console.log(`Socket ${socket.id} left room ${roomName}`);
+    });
+
+
+    socket.on("writeFile", async ({ data, pathToFileOrFolder, projectId }) => {
         try {
-            const response = await fs.writeFile(pathToFileOrFolder, data);
-            editorNamespace.emit("writeFileSuccess", {
-                data: "File written successfully",
+            await fs.writeFile(pathToFileOrFolder, data);
+
+            const roomName = `${projectId}:${pathToFileOrFolder}`;
+
+            // Emit only to others in the same room (excluding sender)
+            socket.to(roomName).emit("writeFileSuccess", {
+                data: data,
                 path: pathToFileOrFolder,
-            })
-        } catch(error) {
+            });
+
+        } catch (error) {
             console.log("Error writing the file", error);
             socket.emit("error", {
                 data: "Error writing the file",
             });
         }
     });
-
 
     socket.on("createFile", async ({ pathToFileOrFolder }) => {
         const isFileAlreadyPresent = await fs.stat(pathToFileOrFolder);
@@ -98,6 +116,8 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
             });
         }
     });
+
+
 
     // socket.on("getPort", async ({ containerName }) => {
     //     const port = await getContainerPort(containerName);

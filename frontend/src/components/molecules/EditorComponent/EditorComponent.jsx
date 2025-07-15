@@ -2,6 +2,7 @@ import Editor from '@monaco-editor/react';
 import { useEffect, useState } from 'react';
 import { useEditorSocketStore } from '../../../store/editorSocketStore';
 import { useActiveFileTabStore } from '../../../store/activeFileTabStore';
+import { useTreeStructureStore } from '../../../store/treeStructureStore';
 
 export const EditorComponent = () => {
 
@@ -13,17 +14,18 @@ export const EditorComponent = () => {
 
     const { editorSocket } = useEditorSocketStore();
     const { activeFileTab, setActiveFileTab } = useActiveFileTabStore();
+    const { projectId } = useTreeStructureStore();
 
     async function downloadTheme() {
         const response = await fetch('/Monokai.json');
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         setEditorState({ ...editorState, theme: data });
     }
 
     function handleEditorTheme(editor, monaco) {
-        monaco.editor.defineTheme('dracula', editorState.theme);
-        monaco.editor.setTheme('dracula');
+        monaco.editor.defineTheme('monokai', editorState.theme);
+        monaco.editor.setTheme('monokai');
     }
 
     function handleChange(value, event) {
@@ -34,13 +36,13 @@ export const EditorComponent = () => {
         }
         timerId = setTimeout(() => {
             console.log("Editor value changed", value);
-        const editorContent = value;
-        editorSocket.emit('writeFile', {
-            pathToFileOrFolder: activeFileTab.path,
-            data: editorContent
-        });
+            const editorContent = value;
+            editorSocket.emit('writeFile', {
+                pathToFileOrFolder: activeFileTab.path,
+                data: editorContent,
+                projectId: projectId
+            });
         }, 2000);
-        
     }
 
     useEffect(() => {
