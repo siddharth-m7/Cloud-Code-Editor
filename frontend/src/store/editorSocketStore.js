@@ -31,6 +31,26 @@ export const useEditorSocketStore = create((set) => ({
             projectTreeStructureSetter(); // Assuming this refreshes tree
         });
 
+        incomingSocket?.on("deleteFolderSuccess", () => {
+            projectTreeStructureSetter(); // Assuming this refreshes tree
+        });
+
+        incomingSocket?.on("createFileSuccess", () => {
+            projectTreeStructureSetter(); // Assuming this refreshes tree
+        });
+
+        incomingSocket?.on("createFolderSuccess", () => {
+            projectTreeStructureSetter(); // Assuming this refreshes tree
+        });
+
+        incomingSocket?.on("renameFileSuccess", () => {
+            projectTreeStructureSetter(); // Assuming this refreshes tree
+        });
+
+        incomingSocket?.on("renameFolderSuccess", () => {
+            projectTreeStructureSetter(); // Assuming this refreshes tree
+        });
+
         set({
             editorSocket: incomingSocket
         });

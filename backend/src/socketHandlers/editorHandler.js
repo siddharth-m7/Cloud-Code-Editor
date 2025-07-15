@@ -36,21 +36,34 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
         }
     });
 
+    // Ensure you're using the promise version of fs
+
     socket.on("createFile", async ({ pathToFileOrFolder }) => {
-        const isFileAlreadyPresent = await fs.stat(pathToFileOrFolder);
-        if(isFileAlreadyPresent) {
+        try {
+            // Check if file exists
+            await fs.access(pathToFileOrFolder);
+        
+            // If no error, file exists
             socket.emit("error", {
                 data: "File already exists",
             });
             return;
+        } catch (err) {
+            // File does not exist (which is what we want)
+            if (err.code !== 'ENOENT') {
+                socket.emit("error", {
+                    data: "Error checking file existence",
+                });
+                return;
+            }
         }
 
         try {
-            const response = await fs.writeFile(pathToFileOrFolder, "");
+            await fs.writeFile(pathToFileOrFolder, "");
             socket.emit("createFileSuccess", {
                 data: "File created successfully",
             });
-        } catch(error) {
+        } catch (error) {
             console.log("Error creating the file", error);
             socket.emit("error", {
                 data: "Error creating the file",
@@ -113,6 +126,38 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
             console.log("Error deleting the folder", error);
             socket.emit("error", {
                 data: "Error deleting the folder",
+            });
+        }
+    });
+
+    socket.on("renameFile", async ({ oldPath, newPath }) => {
+        try {
+            await fs.rename(oldPath, newPath);
+            socket.emit("renameFileSuccess", {
+                data: "File renamed successfully",
+                oldPath,
+                newPath,
+            });
+        } catch (error) {
+            console.log("Error renaming the file", error);
+            socket.emit("error", {
+                data: "Error renaming the file",
+            });
+        }
+    });
+
+    socket.on("renameFolder", async ({ oldPath, newPath }) => {
+        try {
+            await fs.rename(oldPath, newPath);
+            socket.emit("renameFolderSuccess", {
+                data: "Folder renamed successfully",
+                oldPath,
+                newPath,
+            });
+        } catch (error) {
+            console.log("Error renaming the folder", error);
+            socket.emit("error", {
+                data: "Error renaming the folder",
             });
         }
     });

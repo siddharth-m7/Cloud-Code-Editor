@@ -5,6 +5,7 @@ import { useEditorSocketStore } from "../../../store/editorSocketStore";
 import { useTreeStructureStore } from "../../../store/treeStructureStore";
 import { useActiveFileTabStore } from "../../../store/activeFileTabStore";
 import { useFileContextMenuStore } from "../../../store/fileContextMenuStore";
+import { useFolderContextMenuStore } from "../../../store/folderContextMenuStore";
 
 
 export const TreeNode = ({
@@ -29,6 +30,14 @@ export const TreeNode = ({
         setY: setFileContextMenuY
     } = useFileContextMenuStore();
 
+    const {
+        isOpen: isFolderContextOpen,
+        setFolder,
+        setIsOpen: setFolderContextMenuIsOpen,
+        setX: setFolderContextMenuX,
+        setY: setFolderContextMenuY
+    } = useFolderContextMenuStore();
+
     function toggleVisibility(name) {
         setVisibility({
             ...visibility,
@@ -41,7 +50,7 @@ export const TreeNode = ({
         const names = fileFolderData.name.split(".");
         return names[names.length - 1];
     }
-    function handlecontextMenu(e, path) {
+    function handleFileContextMenu(e, path) {
         e.preventDefault();
         console.log("Right Clicked", path);
         setFile(path);
@@ -55,6 +64,20 @@ export const TreeNode = ({
         setFileContextMenuY(e.clientY);
         // Here you can implement your context menu logic
 
+    }
+
+    function handleFolderContextMenu(e, path) {
+        e.preventDefault();
+        console.log("Right Clicked on folder", path);
+        setFolder(path);
+        if (isFolderContextOpen) {
+            setFolderContextMenuIsOpen(false);
+        }
+        else {
+            setFolderContextMenuIsOpen(true);
+        }
+        setFolderContextMenuX(e.clientX);
+        setFolderContextMenuY(e.clientY);
     }
 
 
@@ -98,12 +121,13 @@ export const TreeNode = ({
         <div
             style={{
                 paddingLeft: "15px",
-                color: "white"
+                color: "white",
             }}
         >
             {fileFolderData.children /** If the current node is a folder ? */ ? (
                 /** If the current node is a folder, render it as a button */
                 <button
+                    onContextMenu={(e) => handleFolderContextMenu(e, fileFolderData.path)}
                     onClick={() => toggleVisibility(fileFolderData.name)}
                     style={{
                         border: "none",
@@ -112,7 +136,8 @@ export const TreeNode = ({
                         color: "white",
                         backgroundColor: "transparent",
                         paddingTop: "15px",
-                        fontSize: "16px"
+                        fontSize: "16px",
+
                     }}
                 >
                     {visibility[fileFolderData.name] ? <IoIosArrowDown /> : <IoIosArrowForward />}
@@ -128,9 +153,10 @@ export const TreeNode = ({
                             fontSize: "15px",
                             cursor: "pointer",
                             marginLeft: "5px",
+                            height: "30px",
                             // color: "black"
                         }}
-                        onContextMenu={(e) => handlecontextMenu(e, fileFolderData.path)}
+                        onContextMenu={(e) => handleFileContextMenu(e, fileFolderData.path)}
                         onClick={() => handleClick(fileFolderData)}
                     >
                         {fileFolderData.name}
