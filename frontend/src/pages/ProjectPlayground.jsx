@@ -6,6 +6,7 @@ import { useTreeStructureStore } from "../store/treeStructureStore.js";
 import { useEditorSocketStore } from "../store/editorSocketStore.js";
 import { useEffect } from "react";
 import { io } from "socket.io-client";
+import { BrowserTerminal } from "../components/molecules/BrowserTerminal/BrowserTerminal.jsx";
 
 export const ProjectPlayground = () => {
 
@@ -29,13 +30,12 @@ export const ProjectPlayground = () => {
     
     return (
         <>
-        {/* <h1>Project Playground for {projectIdfromURL}</h1> */}
         <div style={{ padding: '20px', display: 'flex' , backgroundColor: '#000' }}>
-            
-            
             {projectId && <TreeStructure />}
             <EditorComponent />
-              
+        </div>
+        <div>
+            <BrowserTerminal />
         </div>
         </>
     );
