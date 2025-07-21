@@ -1,23 +1,21 @@
-# Dockerfile for a simple Ubuntu-based image
-# This Dockerfile sets up a basic Ubuntu environment
-FROM ubuntu:20.04 
-# setup user
-RUN useradd -ms /bin/bash sandbox
-# Set the working directory
+FROM ubuntu:20.04
+# Setup user
+RUN useradd -ms /bin/bash sandbox 
+
+# Setup working directory
 WORKDIR /home/sandbox
 
 # update the ubuntu machine
 RUN apt update && apt upgrade -y
-# install nano and curl
-RUN apt install nano curl -y
 
-# install nodejs
+# Install nano and curl
+RUN apt install nano curl -y 
 
-RUN curl -fsSL https://deb.nodesource.com/setup_19.x | bash - && apt-get install -y nodejs
+# Install nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
 
-# configuring ternimal to open current working directory
+# configuring terminal to display current working directory
 RUN echo "PS1='\w '" >> /home/sandbox/.bashrc
 
-# setup the final working directory
+# Setup final working directory
 WORKDIR /home/sandbox/app
-

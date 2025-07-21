@@ -8,6 +8,7 @@ import apiRouter from './routes/index.js';
 import chokidar from 'chokidar';
 import path from 'path';
 import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
+import { handleContainerCreate } from './containers/handleContainerCreate.js';
 
 
 const app = express();
@@ -71,6 +72,24 @@ editorNamespace.on("connection", (socket) => {
     // });
 
     }
+});
+
+const terminalNamespace = io.of('/terminal');
+
+terminalNamespace.on("connection", (socket) => {
+    console.log("terminal connected");
+
+    socket.on('shell-input', (data) => {
+        console.log('Received shell input:', data);
+        terminalNamespace.emit('shell-output', data);
+        // Here you would handle the shell input, e.g., send it to a terminal emulator
+    });
+
+    socket.on('disconnect', () => {
+        console.log('A terminal user disconnected');
+    });
+
+    handleContainerCreate(socket.handshake.query['projectId'], terminalNamespace, socket.request, socket, socket.request.headers['sec-websocket-protocol']);
 });
 
 server.listen(PORT, () => {
