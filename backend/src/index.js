@@ -1,41 +1,31 @@
 import express from 'express';
-import cors from 'cors'; 
-import { PORT } from './config/serverConfig.js';
-import { Server } from 'socket.io'
+import cors from 'cors';
 import { createServer } from 'node:http';
-// Importing the routes
-import apiRouter from './routes/index.js'; 
+import { Server } from 'socket.io';
+import apiRouter from './routes/index.js';
+import { PORT } from './config/serverConfig.js';
 import chokidar from 'chokidar';
-import path from 'path';
 import { handleEditorSocketEvents } from './socketHandlers/editorHandler.js';
-import { handleContainerCreate } from './containers/handleContainerCreate.js';
 
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server
-,{
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-}
-);
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        method: ['GET', 'POST'],
+    }
+});
+
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded());
 app.use(cors());
-
-
 
 app.use('/api', apiRouter);
 
 app.get('/ping', (req, res) => {
-  return res.json ({ message: 'pong' });
-});
-
-io.on('connection', (socket) => {
-  console.log('A user connected');
+    return res.json({ message: 'pong' });
 });
 
 const editorNamespace = io.of('/editor');
@@ -45,7 +35,6 @@ editorNamespace.on("connection", (socket) => {
 
     // somehow we will get the projectId from frontend;
     let projectId = socket.handshake.query['projectId'];
-    // let projectId = '123';
 
     console.log("Project id received after connection", projectId);
 
@@ -62,37 +51,13 @@ editorNamespace.on("connection", (socket) => {
         watcher.on("all", (event, path) => {
             console.log(event, path);
         });
+    }
 
     handleEditorSocketEvents(socket, editorNamespace);
-    
 
-    // socket.on('disconnect', async () => {
-    //     await watcher.close();
-    //     console.log('A user disconnected');
-    // });
-
-    }
-});
-
-const terminalNamespace = io.of('/terminal');
-
-terminalNamespace.on("connection", (socket) => {
-    console.log("terminal connected");
-
-    socket.on('shell-input', (data) => {
-        console.log('Received shell input:', data);
-        terminalNamespace.emit('shell-output', data);
-        // Here you would handle the shell input, e.g., send it to a terminal emulator
-    });
-
-    socket.on('disconnect', () => {
-        console.log('A terminal user disconnected');
-    });
-
-    handleContainerCreate(socket.handshake.query['projectId'], terminalNamespace, socket.request, socket, socket.request.headers['sec-websocket-protocol']);
 });
 
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
+    console.log(process.cwd())
 });
-

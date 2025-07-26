@@ -1,14 +1,10 @@
-import { Router } from './Router.jsx';
-import { io } from 'socket.io-client';
-
+import { Router } from './Router'
 function App() {
 
-  
   return (
-    <>
-      <Router />
-    </>
+    <Router />
   )
+  
 }
 
 export default App

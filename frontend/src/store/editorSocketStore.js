@@ -1,55 +1,37 @@
 import { create } from "zustand";
 import { useActiveFileTabStore } from "./activeFileTabStore";
 import { useTreeStructureStore } from "./treeStructureStore";
+import { usePortStore } from "./portStore";
 
 export const useEditorSocketStore = create((set) => ({
     editorSocket: null,
     setEditorSocket: (incomingSocket) => {
-        const activeFileTabStore = useActiveFileTabStore.getState();
+
+        const activeFileTabSetter = useActiveFileTabStore.getState().setActiveFileTab;
         const projectTreeStructureSetter = useTreeStructureStore.getState().setTreeStructure;
+        const portSetter = usePortStore.getState().setPort;
 
         incomingSocket?.on("readFileSuccess", (data) => {
             console.log("Read file success", data);
             const fileExtension = data.path.split('.').pop();
-            activeFileTabStore.setActiveFileTab(data.path, data.value, fileExtension);
+            activeFileTabSetter(data.path, data.value, fileExtension);
         });
 
-        incomingSocket?.on("writeFileSuccess", ({ path, data }) => {
-            const currentFile = useActiveFileTabStore.getState().activeFileTab;
-
-            // ✅ Only update the editor if the file is currently open
-            if (currentFile?.path === path) {
-                useActiveFileTabStore.getState().setActiveFileTab(path, data, path.split('.').pop());
-            } else {
-                // 🔒 Otherwise, ignore the event (do NOT open another file!)
-                console.log(`Ignored update for ${path}, not currently active in this tab`);
-            }
+        incomingSocket?.on("writeFileSuccess", (data) => {
+            console.log("Write file success", data);
+            // incomingSocket.emit("readFile", {
+            //     pathToFileOrFolder: data.path
+            // })
         });
-
 
         incomingSocket?.on("deleteFileSuccess", () => {
-            projectTreeStructureSetter(); // Assuming this refreshes tree
+            projectTreeStructureSetter();
         });
 
-        incomingSocket?.on("deleteFolderSuccess", () => {
-            projectTreeStructureSetter(); // Assuming this refreshes tree
-        });
-
-        incomingSocket?.on("createFileSuccess", () => {
-            projectTreeStructureSetter(); // Assuming this refreshes tree
-        });
-
-        incomingSocket?.on("createFolderSuccess", () => {
-            projectTreeStructureSetter(); // Assuming this refreshes tree
-        });
-
-        incomingSocket?.on("renameFileSuccess", () => {
-            projectTreeStructureSetter(); // Assuming this refreshes tree
-        });
-
-        incomingSocket?.on("renameFolderSuccess", () => {
-            projectTreeStructureSetter(); // Assuming this refreshes tree
-        });
+        incomingSocket?.on("getPortSuccess", ({ port }) => {
+            console.log("port data", port);
+            portSetter(port);
+        })
 
         set({
             editorSocket: incomingSocket

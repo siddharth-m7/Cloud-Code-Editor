@@ -1,21 +1,23 @@
-import uuid4 from 'uuid4';
+import uuid4 from "uuid4";
 import fs from 'fs/promises';
 import { REACT_PROJECT_COMMAND } from '../config/serverConfig.js';
-import { execPromisified } from '../utils/execUtility.js';
-import directoryTree from 'directory-tree';
+import { execPromisified } from "../utils/execUtility.js";
 import path from 'path';
+import directoryTree from "directory-tree";
+
 
 export const createProjectService = async () => {
-     // Create a unique id and then create a folder with that id inside the projects folder
+    // Create a unique id and then inside the projects folder create a new folder with that id
     const projectId = uuid4();
-    console.log(`Creating project with ID: ${projectId}`);
+    console.log("New project id is", projectId);
 
     await fs.mkdir(`./projects/${projectId}`);
 
-    const response = await execPromisified(REACT_PROJECT_COMMAND,{
+    // After this call the npm creaste vite command in the newly created project folder
+
+    const response = await execPromisified(REACT_PROJECT_COMMAND, {
         cwd: `./projects/${projectId}`
-    }
-    ); 
+    });
 
     return projectId;
 }

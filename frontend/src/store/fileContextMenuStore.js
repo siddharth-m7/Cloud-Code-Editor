@@ -5,14 +5,14 @@ export const useFileContextMenuStore = create((set) => ({
     y: null,
     isOpen: false,
     file: null,
-    setX : (incomingX) => {
-        set({ 
-            x: incomingX 
+    setX: (incomingX) => {
+        set({
+            x: incomingX
         });
     },
-    setY : (incomingY) => {
-        set({ 
-            y: incomingY 
+    setY: (incomingY) => {
+        set({
+            y: incomingY
         });
     },
     setIsOpen: (incomingIsOpen) => {
